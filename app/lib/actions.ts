@@ -61,6 +61,7 @@ const FormSchema = z.object({
         VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
       `;
     } catch (error) {
+      console.error('Database Error:', error);
       // If a database error occurs, return a more specific error.
       return {
         message: 'Database Error: Failed to Create Invoice.',
@@ -102,6 +103,7 @@ export async function updateInvoice(
       WHERE id = ${id}
     `;
   } catch (error) {
+    console.error('Database Error:', error);
     return { message: 'Database Error: Failed to Update Invoice.' };
   }
  
@@ -110,11 +112,14 @@ export async function updateInvoice(
 }
 
 export async function deleteInvoice(id: string) {
-  throw new Error('Failed to Delete Invoice');
- 
-  // Unreachable code block
-  await sql`DELETE FROM invoices WHERE id = ${id}`;
-  revalidatePath('/dashboard/invoices');
+  try {
+    await sql`DELETE FROM invoices WHERE id = ${id}`;
+    revalidatePath('/dashboard/invoices');
+    return { message: 'Deleted Invoice.' };
+  } catch (error) {
+    console.error('Database Error:', error);
+    return { message: 'Database Error: Failed to Delete Invoice.' };
+  }
 }
 
 export async function authenticate(
